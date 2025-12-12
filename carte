@@ -1,0 +1,64 @@
+#!/usr/bin/env python3
+import random
+
+def create_deck():
+    ranks = ['2','3','4','5','6','7','8','9','10','J','Q','K','A']
+    suits = ['♠','♥','♦','♣']
+    deck = [r + s for r in ranks for s in suits]
+    random.shuffle(deck)
+    return deck
+
+def score_hand(hand):
+    values = {'2':2,'3':3,'4':4,'5':5,'6':6,'7':7,'8':8,'9':9,'10':10,'J':10,'Q':10,'K':10,'A':11}
+    total = 0
+    aces = 0
+    for card in hand:
+        if card.startswith('10'):
+            rank = '10'
+        else:
+            rank = card[0]
+        total += values[rank]
+        if rank == 'A':
+            aces += 1
+    while total > 21 and aces:
+        total -= 10
+        aces -= 1
+    return total
+
+if __name__ == '__main__':
+    deck = create_deck()
+    player = [deck.pop(), deck.pop()]
+    dealer = [deck.pop(), deck.pop()]
+
+    print('Votre main:', ', '.join(player), '->', score_hand(player))
+    print('Main du croupier: ', dealer[0], ', ??')
+
+    while True:
+        action = input('Taper H pour Tirer, S pour Rester: ').strip().lower()
+        if action == 'h':
+            player.append(deck.pop())
+            print('Vous avez:', ', '.join(player), '->', score_hand(player))
+            if score_hand(player) > 21:
+                print('Vous avez dépassé 21. Perdu.')
+                break
+        elif action == 's':
+            break
+        else:
+            print('Entrée invalide.')
+
+    if score_hand(player) <= 21:
+        print('Tour du croupier...')
+        print('Main croupier:', ', '.join(dealer), '->', score_hand(dealer))
+        while score_hand(dealer) < 17:
+            dealer.append(deck.pop())
+            print('Croupier tire:', ', '.join(dealer), '->', score_hand(dealer))
+
+        p = score_hand(player)
+        d = score_hand(dealer)
+
+        if d > 21 or p > d:
+            print(f'Vous gagnez ! ({p} vs {d})')
+        elif p == d:
+            print(f'Égalité ({p}).')
+        else:
+            print(f'Le croupier gagne ({d} vs {p}).')
